@@ -3,23 +3,26 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/thomaschiozzi-tndigit/jgo/internal/cli"
 	"github.com/thomaschiozzi-tndigit/jgo/internal/jwt"
-	"os"
 )
 
 func main() {
-	fmt.Println("Program inputs", os.Args)
-	if flag.NArg() == 0 {
-		fmt.Println("missing mandatory input: provided no inputs")
-		flag.Usage()
-		return
-	}
-	inputs := flag.Args()
-	inJwt := inputs[0]
-	j, err := jwt.ParseJwt(inJwt)
+	opts, pargs, err := cli.ParseArgs()
 	if err != nil {
-		fmt.Printf("unable to decode the input string, obtained error %v", err.Error())
+		fmt.Println(err)
+		flag.Usage()
+	}
+	source := jwt.NewSource(opts.Path, opts.Url, pargs.Source)
+	jwtValue, err := source.GetJwt()
+	if err != nil {
+		fmt.Println("unable to fetch jwt from source: obtained error", err)
 		return
 	}
-	fmt.Println(j.ToString())
+	j, err := jwt.ParseJwt(jwtValue)
+	if err != nil {
+		fmt.Printf("unable to decode the input string, obtained error: %v", err.Error())
+		return
+	}
+	fmt.Println(j.String())
 }
