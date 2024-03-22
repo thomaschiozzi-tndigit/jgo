@@ -11,6 +11,9 @@ import (
 
 var headerExpectedKeys = [...]string{"alg", "type"}
 
+// Jwt is a wrapper for a JWT. The head and claims in the struct are
+// guaranteed to be valid json strings, while the string is encoded in
+// format base64 url encoding
 type Jwt struct {
 	Head      string
 	ClaimsSet string
@@ -29,66 +32,61 @@ func (j *Jwt) String() string {
 		log.Panic(err)
 	}
 	return strings.Join([]string{head.String(), claims.String(), j.Signature}, "\n.\n")
-	//return j.Head + "\n.\n" + j.ClaimsSet + "\n.\n" + j.Signature
 }
 
-func (j *Jwt) IsValid() bool {
-	// TODO
-	return false
+// IsValid returns true if the given string is a valid jwt
+// The function does NOT return why the string is not a valid. This task
+// is delegated to the parser and in general parsing should be
+// preferred to validation.
+func IsValid(jwt string) bool {
+	_, err := ParseJwt(jwt)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
-func (j *Jwt) CheckSignature() string {
-	// TODO
-	return "TODO"
-}
-
-// decode a jwt part (base 64 url encoded) to byte array
-func decodeJwtPart(part string) ([]byte, error) {
+// decode a jwt part (base 64 url encoded) to a valid JSON string
+// Returns error is the decoding fails or if the result is not a valid JSON string
+func decodeJwtPart(part string) (string, error) {
 	if len(part) == 0 {
-		return make([]byte, 0), nil
+		return "", nil
 	}
 	decoded, err := base64.RawURLEncoding.DecodeString(part)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return decoded, nil
+	// TODO: consider moving this to IsValid() method
+	if !json.Valid(decoded) {
+		return "", fmt.Errorf("decoded JWT part is not a valid JSON string")
+	}
+	return string(decoded), nil
 }
 
 func splitJwt(jwt string) (string, string, string, error) {
-	// TODO: refactor and review
-	return "", "", "", nil
+	numDots := strings.Count(jwt, ".")
+	if numDots != 2 {
+		return "", "", "", fmt.Errorf("string %s is not a jwt: it does not contain 2 dots, but %v were found instead", jwt, numDots)
+	}
+	jwtParts := strings.Split(jwt, ".")
+	return jwtParts[0], jwtParts[1], jwtParts[2], nil
 }
 
 // ParseJwt decode a string to jwt internal struct
-// return error if the string is invalid
+// return error if the string cannot represent a JWT
 func ParseJwt(jwt string) (*Jwt, error) {
-	// TODO: use splitJwt
-	numDots := strings.Count(jwt, ".")
-	if numDots != 2 {
-		return nil, fmt.Errorf("string %s is not a jwt: it does not contain 2 dots, but %v were found instead", jwt, numDots)
-	}
-
-	jwtParts := strings.Split(jwt, ".")
-
-	rawHeader, err := decodeJwtPart(jwtParts[0])
+	headB64, claimsB64, signatureB64, err := splitJwt(jwt)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode jwt header %s: not a valid base64 url encoded string: %w", jwtParts[0], err)
+		return nil, err
 	}
-	header := string(rawHeader)
-	if !json.Valid(rawHeader) {
-		return nil, fmt.Errorf("decode JWT header is not a valid JSON: decoded header %s", header)
-	}
-
-	rawClaimSet, err := decodeJwtPart(jwtParts[1])
+	header, err := decodeJwtPart(headB64)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode jwt claim set %s: not a valid base64 url encoded string: %w", jwtParts[1], err)
+		return nil, fmt.Errorf("failed to decode jwt header %s: %w", headB64, err)
 	}
-	claimSet := string(rawClaimSet)
-	if !json.Valid(rawClaimSet) {
-		return nil, fmt.Errorf("decode JWT claim set is not a valid JSON: decoded claims set %s", string(rawClaimSet))
+	claims, err := decodeJwtPart(claimsB64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode jwt claim set %s: %w", claimsB64, err)
 	}
-
-	rawSignature := jwtParts[2] // might be empty if sign is none
-
-	return &Jwt{Head: header, ClaimsSet: claimSet, Signature: rawSignature}, nil
+	// TODO: check that signature is b64 url encoded
+	return &Jwt{Head: header, ClaimsSet: claims, Signature: signatureB64}, nil
 }

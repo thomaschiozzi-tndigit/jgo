@@ -6,7 +6,7 @@ type Source interface {
 }
 
 func NewSource(path bool, url bool, value string) Source {
-	// TODO: implement "enum" for sourceType (according rto what Go currently allows...)
+	// TODO: implement "enum" for sourceType (according to what Go currently allows...)
 	if path && url {
 		panic("only one among path and url should be used, TODO: handle error properly by returning usage and quitting")
 	}
