@@ -39,7 +39,10 @@ func (j *Jwt) String() string {
 // is delegated to the parser and in general parsing should be
 // preferred to validation.
 func IsValid(jwt string) bool {
+	// could use a more concise implementation
+	//https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
 	_, err := ParseJwt(jwt)
+	// TODO: compare to model and check
 	if err != nil {
 		return false
 	}
