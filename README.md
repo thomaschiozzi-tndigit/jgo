@@ -27,14 +27,14 @@ TODO: how to use the tool, maybe with one example?
 # Roadmap
 - [x] Core JWT decode function
 - [ ] CLI interface for double click usage?
-- [ ] Printing nice outputs (configurable from flags)
-- [ ] Tests
-- [ ] decent/passable argument parser
+- [x] Printing nice outputs (configurable from flags)
+- [x] Tests on parsing
 - [x] decode JWT from stdin
 - [x] decode JWT from file
 - [x] decode JWT from remote
 - [ ] recursively "decode" JWT
 - [ ] accept signature key from stdin and validate signature
-- [x] validate JWT signature when pub key can be recovered online
+- [x] validate JWT signature when pub key can be recovered online (PKI)
+- [ ] Tests on signature verification
 - [ ] forge jwt from config file
 - [ ] forge jwt from interactive CLI

@@ -171,6 +171,10 @@ func isAlgSupported(alg string) bool {
 	return slices.Contains(suppAlg, alg)
 }
 
+func wellKnownEndpoint(iss string) string {
+	return strings.ReplaceAll(iss, `\/`, `/`) + "/.well-known/openid-configuration"
+}
+
 // requestPublicJWKS obtained public jwksModel key sets using information
 // available in the jwt. This requires a two-round network call, in particular
 //  1. Obtain the iss claims from jwt
@@ -192,7 +196,7 @@ func requestPublicJWKS(j *Jwt) (*jwksModel, error) {
 		return nil, fmt.Errorf("%w : %w", ErrSignatureNoKey, err)
 	}
 	// 2. obtain discovery document
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, claims.Iss+"/.well-known/openid-configuration", nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, wellKnownEndpoint(claims.Iss), nil)
 	if err != nil {
 		return nil, fmt.Errorf("%w : %w", ErrSignatureNetwork, err)
 	}
@@ -202,7 +206,7 @@ func requestPublicJWKS(j *Jwt) (*jwksModel, error) {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%w: not a 200 response in discovery document", ErrSignatureNetwork)
+		return nil, fmt.Errorf("%w: not a 200 response in discovery document %s, instead %d", ErrSignatureNetwork, wellKnownEndpoint(claims.Iss), res.StatusCode)
 	}
 	docBody, err := io.ReadAll(res.Body)
 	if err != nil {

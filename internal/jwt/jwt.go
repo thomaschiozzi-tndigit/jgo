@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var headerExpectedKeys = [...]string{"alg", "type"}
-
 // Jwt is a wrapper for a JWT. The head and claims in the struct are
 // guaranteed to be valid json strings, while the string is encoded in
 // format base64 url encoding
@@ -22,7 +20,7 @@ type Jwt struct {
 
 func (j *Jwt) String() string {
 	var head, claims bytes.Buffer
-	separator := "    "
+	separator := "\t"
 	err := json.Indent(&head, []byte(j.Head), "", separator)
 	if err != nil {
 		log.Panic(err)
