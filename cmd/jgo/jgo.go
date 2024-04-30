@@ -27,15 +27,16 @@ func main() {
 	fmt.Println(j.String())
 
 	// verify signature
-	keys, err := jwt.PKCStore(j)
-	if err != nil {
-		fmt.Println("\nskipped signature verification: this is probably not a JWT access token", err)
-		return
+	if opts.CheckSignature {
+		keys, err := jwt.PKCStore(j)
+		if err != nil {
+			fmt.Println("\nskipped signature verification: this is probably not a JWT access token", err)
+			return
+		}
+		if ok, _ := jwt.VerifySignature(jwtValue, keys); !ok {
+			fmt.Println("\nFailed to verify signature >:(")
+		} else {
+			fmt.Println("\nSignature is valid! :)")
+		}
 	}
-	if ok, _ := jwt.VerifySignature(jwtValue, keys); !ok {
-		fmt.Println("\nFailed to verify signature >:(")
-	} else {
-		fmt.Println("\nSignature is valid! :)")
-	}
-
 }

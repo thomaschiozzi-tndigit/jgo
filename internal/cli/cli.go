@@ -8,8 +8,9 @@ import (
 
 // Opts is a struct wrapper for optional arguments
 type Opts struct {
-	Path bool
-	Url  bool
+	Path           bool
+	Url            bool
+	CheckSignature bool
 }
 
 // PosArgs is struct wrapper for mandatory positional arguments
@@ -33,6 +34,7 @@ func ParseArgs() (*Opts, *PosArgs, error) {
 	posArgs := &PosArgs{}
 	flag.BoolVar(&opts.Path, "path", false, "if set, interpret input as a file Path containing a JWT as only content")
 	flag.BoolVar(&opts.Url, "url", false, "if set, interpret input as an URL where a JWT is stored")
+	flag.BoolVar(&opts.CheckSignature, "check_sign", false, "is fet, try to verify the signature as OIDC jwt")
 	//flag.BoolVar(&opts.Pretty, "pretty", false, "if set, prettify the result")
 	flag.Parse()
 	// TODO: expand and review flag.Usage()
