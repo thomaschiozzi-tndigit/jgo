@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+const printIndentToken = "\t"
+const printKeyColor = "\033[36m"
+const colorNone = "\033[0m"
+
 // Jwt is a wrapper for a JWT. The head and claims in the struct are
 // guaranteed to be valid json strings, while the string is encoded in
 // format base64 url encoding
@@ -18,18 +22,64 @@ type Jwt struct {
 	Signature string
 }
 
-func (j *Jwt) String() string {
+// PrintOpts is container of all jwt print configurations
+type PrintOpts struct {
+	Indent   string
+	KeyColor string
+}
+
+func (j *Jwt) StringWithOpts(opts PrintOpts) string {
 	var head, claims bytes.Buffer
-	separator := "\t"
-	err := json.Indent(&head, []byte(j.Head), "", separator)
+	indentToken := opts.Indent
+	err := json.Indent(&head, []byte(j.Head), "", indentToken)
 	if err != nil {
 		log.Panic(err)
 	}
-	err = json.Indent(&claims, []byte(j.ClaimsSet), "", separator)
+	err = json.Indent(&claims, []byte(j.ClaimsSet), "", indentToken)
 	if err != nil {
 		log.Panic(err)
 	}
-	return strings.Join([]string{head.String(), claims.String(), j.Signature}, "\n.\n")
+	prettyJwt := strings.Join([]string{head.String(), claims.String(), j.Signature}, "\n.\n")
+	return colorize(prettyJwt, opts)
+}
+
+func (j *Jwt) String() string {
+	return j.StringWithOpts(PrintOpts{printIndentToken, printKeyColor})
+}
+
+// colorize will print a colored decoded jwt
+// currently does not work properly if there is no indent
+func colorize(s string, opts PrintOpts) string {
+	if len(s) == 0 {
+		return ""
+	}
+	if opts.KeyColor == "" {
+		return s
+	}
+	indentWindows := len(opts.Indent)
+	var b strings.Builder
+	var isColored bool
+	var cc string
+	isColored = false
+	for i, c := range s {
+		cc = string(c)
+		if cc != `"` {
+			b.WriteString(cc)
+			continue
+		}
+		if isColored {
+			b.WriteString(cc)
+			b.WriteString(colorNone)
+			isColored = false
+		} else {
+			if s[(i-indentWindows):i] == opts.Indent {
+				b.WriteString(opts.KeyColor)
+			}
+			b.WriteString(cc)
+			isColored = true
+		}
+	}
+	return b.String()
 }
 
 // IsValid returns true if the given string is a valid jwt
