@@ -24,6 +24,16 @@ func main() {
 		fmt.Printf("unable to decode the input string, obtained error: %v", err.Error())
 		return
 	}
+	// convert dates from unix to UTC
+	if opts.ConvertDates {
+		jj, err := j.ConvertEpochsToUTC()
+		if err != nil {
+			fmt.Printf("failed to convert dates due to following error: %v", err)
+			return
+		}
+		j = jj
+	}
+
 	fmt.Println(j.String())
 
 	// verify signature
