@@ -4,6 +4,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+
+	"github.com/thomaschiozzi-tndigit/jgo/internal/io"
 )
 
 // Opts is a struct wrapper for optional arguments
@@ -12,6 +14,20 @@ type Opts struct {
 	Url            bool
 	CheckSignature bool
 	ConvertDates   bool
+}
+
+// SourceType evaluates the given source based on input flags
+func (o *Opts) SourceType() io.SourceType {
+	if o.Path && o.Url {
+		panic("only one among path and url should be used")
+	}
+	if o.Path {
+		return io.SourcePath
+	}
+	if o.Url {
+		return io.SourceUrl
+	}
+	return io.SourceDefault
 }
 
 // PosArgs is struct wrapper for mandatory positional arguments

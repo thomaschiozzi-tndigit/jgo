@@ -3,17 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/thomaschiozzi-tndigit/jgo/internal/cli"
+	"github.com/thomaschiozzi-tndigit/jgo/internal/io"
 	"github.com/thomaschiozzi-tndigit/jgo/internal/jwt"
 )
 
 func main() {
-	opts, pargs, err := cli.ParseArgs()
+	opts, posArgs, err := cli.ParseArgs()
 	if err != nil {
 		fmt.Println(err)
 		flag.Usage()
 	}
-	source := jwt.NewSource(opts.Path, opts.Url, pargs.Source)
+	source := io.NewSource(opts.SourceType(), posArgs.Source)
 	jwtValue, err := source.GetJwt()
 	if err != nil {
 		fmt.Println("unable to fetch jwt from source: obtained error", err)
@@ -38,6 +40,7 @@ func main() {
 
 	// verify signature
 	if opts.CheckSignature {
+		// NOTE: the current solution is an implementation stub
 		keys, err := jwt.PKCStore(j)
 		if err != nil {
 			fmt.Println("\nskipped signature verification: this is probably not a JWT access token", err)

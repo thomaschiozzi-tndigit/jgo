@@ -7,6 +7,10 @@ type FileJwtSource struct {
 	path string
 }
 
+func NewJwtFileSource(path string) *FileJwtSource {
+	return &FileJwtSource{path}
+}
+
 func (f *FileJwtSource) GetJwt() (string, error) {
 	jwtB, err := os.ReadFile(f.path)
 	if err != nil {
