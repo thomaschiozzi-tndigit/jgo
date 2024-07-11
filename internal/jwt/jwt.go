@@ -107,7 +107,6 @@ func decodeJwtPart(part string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// TODO: consider moving this to IsValid() method
 	if !json.Valid(decoded) {
 		return "", fmt.Errorf("decoded JWT part is not a valid JSON string")
 	}
@@ -138,6 +137,5 @@ func ParseJwt(jwt string) (*Jwt, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode jwt claim set %s: %w", claimsB64, err)
 	}
-	// TODO: check that signature is b64 url encoded
 	return &Jwt{Head: header, ClaimsSet: claims, Signature: signatureB64}, nil
 }

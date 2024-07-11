@@ -4,6 +4,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+
+	"github.com/thomaschiozzi-tndigit/jgo/internal/io"
 )
 
 // Opts is a struct wrapper for optional arguments
@@ -11,6 +13,21 @@ type Opts struct {
 	Path           bool
 	Url            bool
 	CheckSignature bool
+	ConvertDates   bool
+}
+
+// SourceType evaluates the given source based on input flags
+func (o *Opts) SourceType() io.SourceType {
+	if o.Path && o.Url {
+		panic("only one among path and url should be used")
+	}
+	if o.Path {
+		return io.SourcePath
+	}
+	if o.Url {
+		return io.SourceUrl
+	}
+	return io.SourceDefault
 }
 
 // PosArgs is struct wrapper for mandatory positional arguments
@@ -34,6 +51,7 @@ func ParseArgs() (*Opts, *PosArgs, error) {
 	posArgs := &PosArgs{}
 	flag.BoolVar(&opts.Path, "path", false, "if set, interpret input as a file Path containing a JWT as only content")
 	flag.BoolVar(&opts.Url, "url", false, "if set, interpret input as an URL where a JWT is stored")
+	flag.BoolVar(&opts.ConvertDates, "cvt_dates", false, "if set, convert default epoch claims to ")
 	flag.BoolVar(&opts.CheckSignature, "check_sign", false, "is fet, try to verify the signature as OIDC jwt")
 	//flag.BoolVar(&opts.Pretty, "pretty", false, "if set, prettify the result")
 	flag.Parse()

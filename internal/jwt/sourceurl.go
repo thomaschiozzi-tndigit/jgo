@@ -10,6 +10,10 @@ type UrlJwtSource struct {
 	url string
 }
 
+func NewUrlJwtSource(url string) *UrlJwtSource {
+	return &UrlJwtSource{url}
+}
+
 func (u *UrlJwtSource) GetJwt() (string, error) {
 	r, err := http.Get(u.url)
 	if err != nil {

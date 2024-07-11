@@ -5,6 +5,10 @@ type StdinJwtSource struct {
 	value string
 }
 
+func NewStdinJwtSource(value string) *StdinJwtSource {
+	return &StdinJwtSource{value}
+}
+
 func (s *StdinJwtSource) GetJwt() (string, error) {
 	return s.value, nil
 }

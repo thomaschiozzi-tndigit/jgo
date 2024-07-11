@@ -365,13 +365,29 @@ func verifyRS512(message []byte, sig []byte, pkm PublicRSAModel) (bool, error) {
 	return true, nil
 }
 
+func parseESSignature(sig []byte) (r *big.Int, s *big.Int, err error) {
+	if len(sig) != 64 {
+		err = errors.New("invalid ES signature format")
+		return
+	}
+	r = new(big.Int)
+	r.SetBytes(sig[:32])
+	s = new(big.Int)
+	s.SetBytes(sig[32:])
+	return
+}
+
 func verifyES256(message []byte, sig []byte, pkm PublicESModel) (bool, error) {
 	pk, err := pkm.toKey()
 	if err != nil {
 		return false, err
 	}
 	digest := sha256.Sum256(message)
-	if ok := ecdsa.VerifyASN1(pk, digest[:], sig); !ok {
+	r, s, err := parseESSignature(sig)
+	if err != nil {
+		return false, err
+	}
+	if ok := ecdsa.Verify(pk, digest[:], r, s); !ok {
 		return false, errors.New("verification error of ECDSA signature")
 	}
 	return true, nil
@@ -383,7 +399,11 @@ func verifyES384(message []byte, sig []byte, pkm PublicESModel) (bool, error) {
 		return false, err
 	}
 	digest := sha512.Sum384(message)
-	if ok := ecdsa.VerifyASN1(pk, digest[:], sig); !ok {
+	r, s, err := parseESSignature(sig)
+	if err != nil {
+		return false, err
+	}
+	if ok := ecdsa.Verify(pk, digest[:], r, s); !ok {
 		return false, errors.New("verification error of ECDSA signature")
 	}
 	return true, nil
@@ -395,7 +415,11 @@ func verifyES512(message []byte, sig []byte, pkm PublicESModel) (bool, error) {
 		return false, err
 	}
 	digest := sha512.Sum512(message)
-	if ok := ecdsa.VerifyASN1(pk, digest[:], sig); !ok {
+	r, s, err := parseESSignature(sig)
+	if err != nil {
+		return false, err
+	}
+	if ok := ecdsa.Verify(pk, digest[:], r, s); !ok {
 		return false, errors.New("verification error of ECDSA signature")
 	}
 	return true, nil
