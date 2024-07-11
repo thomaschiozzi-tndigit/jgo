@@ -15,10 +15,10 @@ func convertE2UTC(data []byte) ([]byte, error) {
 		return nil, errors.New("claims are not a json")
 	}
 	m := v.(map[string]interface{})
-	for k, v := range m {
-		switch v.(type) {
+	for k, vv := range m {
+		switch vv.(type) {
 		case map[string]interface{}:
-			v1, err := json.Marshal(v)
+			v1, err := json.Marshal(vv)
 			if err != nil {
 				return nil, fmt.Errorf("internal error: %w", err)
 			}
@@ -34,7 +34,6 @@ func convertE2UTC(data []byte) ([]byte, error) {
 					m[k] = time.Unix(int64(epoch), 0).UTC().String()
 				}
 			}
-
 		}
 	}
 	res, err := json.Marshal(m)

@@ -26,7 +26,7 @@ func NewSource(st SourceType, value string) Source {
 		return jwt.NewJwtFileSource(value)
 	case SourceUrl:
 		return jwt.NewUrlJwtSource(value)
-	case SourceDefault:
+	case SourceStdin:
 		return jwt.NewStdinJwtSource(value)
 	default:
 		return NewSource(autoDetectsSourceTypeFromValue(value), value)
