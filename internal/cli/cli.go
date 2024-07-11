@@ -12,6 +12,7 @@ import (
 type Opts struct {
 	Path           bool
 	Url            bool
+	Recursive      bool
 	CheckSignature bool
 	ConvertDates   bool
 }
@@ -51,6 +52,7 @@ func ParseArgs() (*Opts, *PosArgs, error) {
 	posArgs := &PosArgs{}
 	flag.BoolVar(&opts.Path, "path", false, "if set, interpret input as a file Path containing a JWT as only content")
 	flag.BoolVar(&opts.Url, "url", false, "if set, interpret input as an URL where a JWT is stored")
+	flag.BoolVar(&opts.Recursive, "rec", false, "if set, will; try to recursively decode jwt values")
 	flag.BoolVar(&opts.ConvertDates, "cvt_dates", false, "if set, convert default epoch claims to ")
 	flag.BoolVar(&opts.CheckSignature, "check_sign", false, "is fet, try to verify the signature as OIDC jwt")
 	//flag.BoolVar(&opts.Pretty, "pretty", false, "if set, prettify the result")

@@ -21,6 +21,17 @@ func main() {
 		fmt.Println("unable to fetch jwt from source: obtained error", err)
 		return
 	}
+
+	if opts.Recursive {
+		j, err := jwt.ParseJwtRecursive(jwtValue)
+		if err != nil {
+			fmt.Printf("unable to decode the input string, obtained error: %v", err.Error())
+			return
+		}
+		fmt.Println(j.String())
+		return
+	}
+
 	j, err := jwt.ParseJwt(jwtValue)
 	if err != nil {
 		fmt.Printf("unable to decode the input string, obtained error: %v", err.Error())
