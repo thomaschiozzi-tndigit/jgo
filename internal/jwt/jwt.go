@@ -10,13 +10,11 @@ import (
 )
 
 const printIndentToken = "\t"
-const printKeyColor = "\033[36m"
-const colorNone = "\033[0m"
 
-// Jwt is a wrapper for a JWT. The head and claims in the struct are
-// guaranteed to be valid json strings, while the string is encoded in
-// format base64 url encoding
-type Jwt struct {
+// Parts is a wrapper for a JWT. The head and claims in the struct are
+// guaranteed to be strings representing valid json objects, while the
+// signature is encoded in format base64 url encoding
+type Parts struct {
 	Head      string
 	ClaimsSet string
 	Signature string
@@ -28,7 +26,18 @@ type PrintOpts struct {
 	KeyColor string
 }
 
-func (j *Jwt) StringWithOpts(opts PrintOpts) string {
+func (j *Parts) toDecoded() (*DecodedJwt, error) {
+	var head, claims map[string]interface{}
+	if err := json.Unmarshal([]byte(j.Head), &head); err != nil {
+		return nil, fmt.Errorf("jwt header is not a json object: %w", err)
+	}
+	if err := json.Unmarshal([]byte(j.ClaimsSet), &claims); err != nil {
+		return nil, fmt.Errorf("jwt claims are not a json object: %w", err)
+	}
+	return &DecodedJwt{head, claims, j.Signature, j}, nil
+}
+
+func (j *Parts) StringWithOpts(opts PrintOpts) string {
 	var head, claims bytes.Buffer
 	indentToken := opts.Indent
 	err := json.Indent(&head, []byte(j.Head), "", indentToken)
@@ -43,43 +52,8 @@ func (j *Jwt) StringWithOpts(opts PrintOpts) string {
 	return colorize(prettyJwt, opts)
 }
 
-func (j *Jwt) String() string {
+func (j *Parts) String() string {
 	return j.StringWithOpts(PrintOpts{printIndentToken, printKeyColor})
-}
-
-// colorize will print a colored decoded jwt
-// currently does not work properly if there is no indent
-func colorize(s string, opts PrintOpts) string {
-	if len(s) == 0 {
-		return ""
-	}
-	if opts.KeyColor == "" {
-		return s
-	}
-	indentWindows := len(opts.Indent)
-	var b strings.Builder
-	var isColored bool
-	var cc string
-	isColored = false
-	for i, c := range s {
-		cc = string(c)
-		if cc != `"` {
-			b.WriteString(cc)
-			continue
-		}
-		if isColored {
-			b.WriteString(cc)
-			b.WriteString(colorNone)
-			isColored = false
-		} else {
-			if s[(i-indentWindows):i] == opts.Indent {
-				b.WriteString(opts.KeyColor)
-			}
-			b.WriteString(cc)
-			isColored = true
-		}
-	}
-	return b.String()
 }
 
 // IsValid returns true if the given string is a valid jwt
@@ -89,7 +63,7 @@ func colorize(s string, opts PrintOpts) string {
 func IsValid(jwt string) bool {
 	// could use a more concise implementation
 	//https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
-	_, err := ParseJwt(jwt)
+	_, err := ParseJwtInParts(jwt)
 	// TODO: compare to model and check
 	if err != nil {
 		return false
@@ -122,9 +96,9 @@ func splitJwt(jwt string) (string, string, string, error) {
 	return jwtParts[0], jwtParts[1], jwtParts[2], nil
 }
 
-// ParseJwt decode a string to jwt internal struct
+// ParseJwtInParts decode a string to jwt internal struct
 // return error if the string cannot represent a JWT
-func ParseJwt(jwt string) (*Jwt, error) {
+func ParseJwtInParts(jwt string) (*Parts, error) {
 	headB64, claimsB64, signatureB64, err := splitJwt(jwt)
 	if err != nil {
 		return nil, err
@@ -137,5 +111,5 @@ func ParseJwt(jwt string) (*Jwt, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode jwt claim set %s: %w", claimsB64, err)
 	}
-	return &Jwt{Head: header, ClaimsSet: claims, Signature: signatureB64}, nil
+	return &Parts{Head: header, ClaimsSet: claims, Signature: signatureB64}, nil
 }

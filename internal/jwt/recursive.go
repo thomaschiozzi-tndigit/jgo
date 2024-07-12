@@ -10,13 +10,14 @@ import (
 	"strings"
 )
 
-type JwtExploded struct {
+type DecodedJwt struct {
 	Head      map[string]interface{} `json:"_jgo.jwt.head,omitempty"`
 	Clams     map[string]interface{} `json:"_jgo.jwt.claims,omitempty"`
 	Signature string                 `json:"_jgo.jwt.signature,omitempty"`
+	Parts     *Parts
 }
 
-func (j *JwtExploded) StringWithOpts(opts PrintOpts) string {
+func (j *DecodedJwt) StringWithOpts(opts PrintOpts) string {
 	var out bytes.Buffer
 	ser, err := json.Marshal(j)
 	if err != nil {
@@ -29,7 +30,7 @@ func (j *JwtExploded) StringWithOpts(opts PrintOpts) string {
 	return colorize(prettyJwt, opts)
 }
 
-func (j *JwtExploded) String() string {
+func (j *DecodedJwt) String() string {
 	return j.StringWithOpts(PrintOpts{printIndentToken, printKeyColor})
 }
 
@@ -72,7 +73,7 @@ func guessIfJwt(s string) bool {
 
 func decodeStringRecursiveStep(v string) (interface{}, error) {
 	if guessIfJwt(v) && IsValid(v) {
-		j, err := ParseJwtRecursive(v)
+		j, err := ParseJwt(v)
 		if err != nil {
 			return nil, err
 		}
@@ -148,18 +149,18 @@ func decodeObjRecursiveStep(o map[string]interface{}) (map[string]interface{}, e
 	return res, nil
 }
 
-func ParseJwtRecursive(jwt string) (*JwtExploded, error) {
-	headB64, claimsB64, signatureB64, err := splitJwt(jwt)
+func ParseJwt(jwt string) (*DecodedJwt, error) {
+	parts, err := ParseJwtInParts(jwt)
 	if err != nil {
 		return nil, err
 	}
-	head, err := decodeJwtPartRecursive(headB64)
+	head, err := decodeJwtPartRecursive(parts.Head)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode jwt header %s: %w", headB64, err)
+		return nil, fmt.Errorf("failed to decode jwt header %s: %w", parts.Head, err)
 	}
-	claims, err := decodeJwtPartRecursive(claimsB64)
+	claims, err := decodeJwtPartRecursive(parts.ClaimsSet)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode jwt claim set %s: %w", claimsB64, err)
+		return nil, fmt.Errorf("failed to decode jwt claim set %s: %w", parts.ClaimsSet, err)
 	}
-	return &JwtExploded{head, claims, signatureB64}, nil
+	return &DecodedJwt{head, claims, parts.Signature, parts}, nil
 }

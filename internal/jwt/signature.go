@@ -189,7 +189,7 @@ func wellKnownEndpoint(iss string) string {
 // then rotated or changed its jwksModel. In this case, the signature should be
 // considered invalid, as this implies that signing key is not to be
 // trusted.
-func requestPublicJWKS(j *Jwt) (*jwksModel, error) {
+func requestPublicJWKS(j *Parts) (*jwksModel, error) {
 	// 1. Extract iss
 	var claims claimsModel
 	if err := json.Unmarshal([]byte(j.ClaimsSet), &claims); err != nil {
@@ -254,7 +254,7 @@ func matchKey(keys []JwkSignatureKeysModel, kid string) (JwkSignatureKeysModel, 
 	return JwkSignatureKeysModel{}, ErrSignatureNoKey
 }
 
-func PKCStore(j *Jwt) ([]JwkSignatureKeysModel, error) {
+func PKCStore(j *Parts) ([]JwkSignatureKeysModel, error) {
 	keys, err := requestPublicJWKS(j)
 	if err != nil {
 		return nil, err
@@ -268,7 +268,7 @@ func PKCStore(j *Jwt) ([]JwkSignatureKeysModel, error) {
 // This information is used to fetch the public key that validates the
 // signature.
 func VerifySignature(jws string, keyStore []JwkSignatureKeysModel) (bool, error) {
-	j, err := ParseJwt(jws)
+	j, err := ParseJwtInParts(jws)
 	if err != nil {
 		return false, errors.New("not a jwt")
 	}

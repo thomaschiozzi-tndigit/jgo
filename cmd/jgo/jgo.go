@@ -22,8 +22,11 @@ func main() {
 		return
 	}
 
+	// TODO: qui c'è del lavoro di architettura di sistemare
+	//  le strutture dati in qualche modo sono legate tra di loro e attualmente butto via cose
+
 	if opts.Recursive {
-		j, err := jwt.ParseJwtRecursive(jwtValue)
+		j, err := jwt.ParseJwt(jwtValue)
 		if err != nil {
 			fmt.Printf("unable to decode the input string, obtained error: %v", err.Error())
 			return
@@ -32,7 +35,7 @@ func main() {
 		return
 	}
 
-	j, err := jwt.ParseJwt(jwtValue)
+	j, err := jwt.ParseJwtInParts(jwtValue)
 	if err != nil {
 		fmt.Printf("unable to decode the input string, obtained error: %v", err.Error())
 		return

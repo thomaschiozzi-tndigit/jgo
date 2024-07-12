@@ -95,9 +95,9 @@ func convertDatesMapRecursiveStep(jsonObj map[string]interface{}) (map[string]in
 
 // ConvertEpochsToUTC will try to convert epoch-based claims ("iat", "nbf" and
 // "exp") and convert them to a .
-func (j *Jwt) ConvertEpochsToUTC() (*Jwt, error) {
+func (j *Parts) ConvertEpochsToUTC() (*Parts, error) {
 	// deep copy input for safety
-	jj := new(Jwt)
+	jj := new(Parts)
 	jj.Head = j.Head
 	jj.Signature = j.Signature
 	claims, err := convertE2UTC([]byte(j.ClaimsSet))
