@@ -1,6 +1,7 @@
-package jwt
+package io
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -19,7 +20,9 @@ func (u *UrlJwtSource) GetJwt() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// TODO: parse the get body to obtain jwt
+	if r.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("remote request response was not 200, instead: %v", r.StatusCode)
+	}
 	jwt, err := io.ReadAll(r.Body)
 	return string(jwt), nil
 }

@@ -1,4 +1,4 @@
-package jwt
+package io
 
 // StdinJwtSource is a wrapper for a JWT that is passed in the program froms stdin
 type StdinJwtSource struct {
