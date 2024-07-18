@@ -2,8 +2,6 @@ package io
 
 import (
 	"path"
-
-	"github.com/thomaschiozzi-tndigit/jgo/internal/jwt"
 )
 
 type SourceType int
@@ -23,11 +21,11 @@ type Source interface {
 func NewSource(st SourceType, value string) Source {
 	switch st {
 	case SourcePath:
-		return jwt.NewJwtFileSource(value)
+		return NewJwtFileSource(value)
 	case SourceUrl:
-		return jwt.NewUrlJwtSource(value)
+		return NewUrlJwtSource(value)
 	case SourceStdin:
-		return jwt.NewStdinJwtSource(value)
+		return NewStdinJwtSource(value)
 	default:
 		return NewSource(autoDetectsSourceTypeFromValue(value), value)
 	}
