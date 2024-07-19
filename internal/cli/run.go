@@ -8,6 +8,7 @@ import (
 
 	"github.com/thomaschiozzi-tndigit/jgo/internal/io"
 	"github.com/thomaschiozzi-tndigit/jgo/internal/jwt"
+	"github.com/thomaschiozzi-tndigit/jgo/internal/version"
 )
 
 const (
@@ -24,6 +25,10 @@ func Run(ctx context.Context) int {
 	if err != nil {
 		logger.Println(err)
 		return ErrUsage
+	}
+	if opts.Version {
+		fmt.Printf("jgo v%v", version.Version)
+		return Success
 	}
 
 	source := io.NewSource(opts.SourceType(), args.Source)

@@ -27,6 +27,7 @@ type PrintOpts struct {
 
 // Opts is a struct wrapper for optional arguments
 type Opts struct {
+	Version bool
 	SourceOpts
 	ResultModifyOpts
 	PrintOpts
@@ -90,6 +91,7 @@ func validate(opt *Opts, args *PosArgs) error {
 func ParseArgs() (*Opts, *PosArgs, error) {
 	opts := &Opts{}
 	posArgs := &PosArgs{}
+	flag.BoolVar(&opts.Version, "version", false, "print tool version")
 	flag.BoolVar(&opts.Path, "path", false, "if set, interpret input as a file Path containing a JWT as only content")
 	flag.BoolVar(&opts.Url, "url", false, "if set, interpret input as an URL where a JWT is stored")
 	flag.BoolVar(&opts.Recursive, "rec", false, "if set, will; try to recursively decode jwt values")
