@@ -1,12 +1,10 @@
 # jgo
-Miscellaneous and utility tools for JOSE/JWT.
+Jgo is a visualization tool for JWT and JOSE.
 
 # Features
 The following core features are currently supported
-1. JWT Decoding.
-2. Pretty print of decoded JWT.
-3. Signature verification of JWT signed with a public key exposes by the token issuer in his well known openid 
-   configuration. 
+1. JWT decoding, including a "recursive" decoding where jwt withing a JWT are decoded.
+2. Pretty print of decoded JWT, with indented output and colored keys.
 
 # Requirements
 The Go programming language is required to build and execute this module. To download Go, you can find more here https://go.dev/doc/install .
@@ -34,13 +32,9 @@ TODO: how to use the tool, maybe with one example?
 - [x] decode JWT from stdin
 - [x] decode JWT from file
 - [x] decode JWT from remote
-- [x] validate JWT signature when pub key can be recovered online (PKI)
-- [ ] accept signature key from stdin and validate signature
 - [x] option to convert exp and iat to human-readable dates
 - [ ] tests for date conversions
-- [ ] recursively "decode" JWT
+- [x] recursively "decode" JWT
+- [ ] test for recursive decoding
 - [ ] CLI interface for double click usage
-- [ ] tests on signature verification
-- [ ] forge jwt from config file
-- [ ] forge jwt from interactive CLI
 - [ ] freeze version 1.0
