@@ -101,6 +101,9 @@ func ParseArgs() (*Opts, *PosArgs, error) {
 	flag.BoolVar(&opts.NoIndent, "noindent", false, "if set, print result without indents")
 	flag.Parse()
 	// TODO: expand and review flag.Usage()
+	if opts.Version {
+		return &Opts{Version: true}, nil, nil
+	}
 	if flag.NArg() == 0 {
 		return nil, nil, fmt.Errorf("missing mandatory positional argument Source")
 	}
