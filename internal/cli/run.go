@@ -21,6 +21,7 @@ const (
 
 func Run(ctx context.Context) int {
 	logger := log.New(os.Stdout, "ERROR: ", log.Lshortfile)
+	OverrideUsage()
 	opts, args, err := ParseArgs()
 	if err != nil {
 		logger.Println(err)

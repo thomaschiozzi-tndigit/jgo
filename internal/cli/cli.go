@@ -94,7 +94,7 @@ func ParseArgs() (*Opts, *PosArgs, error) {
 	flag.BoolVar(&opts.Version, "version", false, "print tool version")
 	flag.BoolVar(&opts.Path, "path", false, "if set, interpret input as a file Path containing a JWT as only content")
 	flag.BoolVar(&opts.Url, "url", false, "if set, interpret input as an URL where a JWT is stored")
-	flag.BoolVar(&opts.Recursive, "rec", false, "if set, will; try to recursively decode jwt values")
+	flag.BoolVar(&opts.Recursive, "rec", false, "if set will try to recursively decode jwt values")
 	flag.BoolVar(&opts.ConvertDates, "cvt_dates", false, "if set, convert default epoch claims to ")
 	flag.BoolVar(&opts.AsJson, "json", false, "if set, represent output as json")
 	flag.BoolVar(&opts.NoColor, "nocolor", false, "if set, print result without colours")
